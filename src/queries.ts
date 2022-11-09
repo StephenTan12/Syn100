@@ -6,7 +6,7 @@ dotenv.config();
 
 // Database
 const pool: pg.Pool = new pg.Pool({
-  user: process.env.USER,
+  user: process.env.USER_ID,
   host: process.env.HOST,
   database: process.env.DATABASE,
   password: process.env.PASSWORD,
@@ -21,7 +21,7 @@ const getItem = (req, res, next) => {
   }
 
   pool
-    .query('SELECT * FROM test WHERE id = $1;', [id])
+    .query('SELECT * FROM items WHERE id = $1;', [id])
     .then((results) => {
       if (results.rows.length == 0) {
         next(errors.ERRORS.ItemNotFound);
