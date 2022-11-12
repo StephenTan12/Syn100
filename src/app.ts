@@ -2,10 +2,15 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import db from './queries';
 import errors from './errors';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
 // Middlware
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -20,7 +25,9 @@ app.use((err, req, res, next) => {
   res.json({ message: message });
 });
 
-const port = 3000;
-app.listen(port, () => {
-  return console.log(`Express is listening at http://localhost:${port}`);
+const port: number = parseInt(process.env.SERVER_PORT);
+const ip: string = process.env.SERVER_IP;
+
+app.listen(port, ip, () => {
+  return console.log(`Express is listening at ${ip}:${port}`);
 });
