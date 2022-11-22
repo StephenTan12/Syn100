@@ -4,6 +4,21 @@ import errors from './errors';
 
 dotenv.config();
 
+// Constants
+const PRODUCTION_CONSTANTS = {
+  "steelIron": 1.39,
+  "cement": 0.59,
+  "plastic": 2.6,
+  "glass": 0.54,
+  "latex": 0.54,
+  "rubber": 0.74,
+  "copper": 0.2,
+  "silver": 196,
+  "aluminum": 10.14,
+  "textile": 25,
+  "paper": 0.0028
+}
+
 // Database
 const pool: pg.Pool = new pg.Pool({
   user: process.env.USER_ID,
@@ -27,25 +42,36 @@ const getItem = async (req, res, next) => {
         next(errors.ERRORS.ItemNotFound);
       }
       const unformattedResults = results.rows[0]
+      const productionStats = {
+        "steelIron": unformattedResults.steeliron,
+        "cement": unformattedResults.cement,
+        "plastic": unformattedResults.plastic,
+        "glass": unformattedResults.glass,
+        "latex": unformattedResults.latex,
+        "rubber": unformattedResults.rubber,
+        "copper": unformattedResults.copper,
+        "silver": unformattedResults.silver,
+        "aluminum": unformattedResults.aluminum,
+        "textile": unformattedResults.textile,
+        "paper": unformattedResults.paper
+      }
+
+      let productionCost = 0
+      for (const [key, value] of Object.entries(productionStats)) {
+        productionCost += value * PRODUCTION_CONSTANTS[key]
+      }
+      
+      const electricalCost = unformattedResults.electricitykwh * 0.001183 * 8760
+
       const formattedResults = {
         "id": unformattedResults.id,
         "name": unformattedResults.name,
         "imgid": unformattedResults.imgid,
         "description": unformattedResults.description,
-        "productionStats": {
-          "steelIron": unformattedResults.steeliron,
-          "cement": unformattedResults.cement,
-          "plastic": unformattedResults.plastic,
-          "glass": unformattedResults.glass,
-          "latex": unformattedResults.latex,
-          "rubber": unformattedResults.rubber,
-          "copper": unformattedResults.copper
-        },
-        "productionStatsTotal": unformattedResults.productionstatstotal,
-        "electricityStats": {
-          "test": unformattedResults.test
-        },
-        "electricityStatsTotal": unformattedResults.electricitystatstotal
+        "productionStats": productionStats,
+        "productionCost": productionCost,
+        "electricityKWH": unformattedResults.electricitykwh,
+        "electricityCost": electricalCost
       }
       res.status(200).json(formattedResults);
     })
