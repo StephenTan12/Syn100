@@ -21,12 +21,33 @@ const getItem = async (req, res, next) => {
   }
 
   await pool
-    .query('SELECT * FROM items WHERE id = $1;', [id])
+    .query('SELECT * FROM items LEFT JOIN production_stats USING (id) LEFT JOIN electricity_stats USING (id) WHERE id = $1;', [id])
     .then((results) => {
       if (results.rows.length == 0) {
         next(errors.ERRORS.ItemNotFound);
       }
-      res.status(200).json(results.rows[0]);
+      const unformattedResults = results.rows[0]
+      const formattedResults = {
+        "id": unformattedResults.id,
+        "name": unformattedResults.name,
+        "imgid": unformattedResults.imgid,
+        "description": unformattedResults.description,
+        "productionStats": {
+          "steelIron": unformattedResults.steeliron,
+          "cement": unformattedResults.cement,
+          "plastic": unformattedResults.plastic,
+          "glass": unformattedResults.glass,
+          "latex": unformattedResults.latex,
+          "rubber": unformattedResults.rubber,
+          "copper": unformattedResults.copper
+        },
+        "productionStatsTotal": unformattedResults.productionstatstotal,
+        "electricityStats": {
+          "test": unformattedResults.test
+        },
+        "electricityStatsTotal": unformattedResults.electricitystatstotal
+      }
+      res.status(200).json(formattedResults);
     })
     .catch((err) => {
       next(err);
