@@ -35,6 +35,8 @@ const getItem = async (req, res, next) => {
     next(errors.ERRORS.ItemIdNotInt);
   }
 
+  console.log("querying item")
+
   await pool
     .query('SELECT * FROM items LEFT JOIN production_stats USING (id) LEFT JOIN electricity_stats USING (id) WHERE id = $1;', [id])
     .then((results) => {
@@ -57,10 +59,23 @@ const getItem = async (req, res, next) => {
       }
 
       let productionCost = 0
+      const productionArray = []
       for (const [key, value] of Object.entries(productionStats)) {
-        productionCost += value * PRODUCTION_CONSTANTS[key]
+        const cost = value * PRODUCTION_CONSTANTS[key]
+        productionCost += cost
+        productionArray.push([key, cost])
       }
-      
+
+      productionArray.sort((l, r) => {
+        if (l[1] > r[1]) {
+          return -1
+        } else if (l[1] < r[1]) {
+          return 1
+        }
+        return 0
+      })
+
+      const topFiveProduction = productionArray.slice(0, 5)
       const electricalCost = unformattedResults.electricitykwh * 0.001183 * 8760
 
       const formattedResults = {
@@ -70,12 +85,15 @@ const getItem = async (req, res, next) => {
         "description": unformattedResults.description,
         "productionStats": productionStats,
         "productionCost": productionCost,
+        "productionTopFive": topFiveProduction,
         "electricityKWH": unformattedResults.electricitykwh,
         "electricityCost": electricalCost
       }
       res.status(200).json(formattedResults);
     })
     .catch((err) => {
+      console.log(err)
+
       next(err);
     });
 };
