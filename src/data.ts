@@ -40,7 +40,7 @@ const data = {
     '3': {
         id: 3,
         name: 'Clock',
-        imgid: '',
+        imgid: '1ecpDzY1wbtpPzW5m9rxPJX9nmfsv4qwm',
         description: 'A common analog clock, with similar models being manufactured and sold worldwide. A simple yet reliable design.',
         productionstatsid: 3,
         electricitykwh: 0.003,
@@ -97,7 +97,7 @@ const data = {
     '6': {
         id: 6,
         name: 'Carpet Flooring',
-        imgid: '',
+        imgid: '1n4Jp4qwlHaLdSrkLIxunXhT6J35iPTel',
         description:'A common flooring material, carpet is primarily made of nylon, which is derived from crude oil and is very costly. Though other synthetic materials are used, most have similarly expensive oil and water requirements',
         productionstatsid: 6,
         electricitykwh: 0,
