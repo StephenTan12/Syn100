@@ -22,18 +22,21 @@ const getItem = async (req, res, next) => {
     next(errors.ERRORS.ItemIdNotInt);
   }
 
-  if (process.env.RUN_LOCALLY === "TRUE") {
+  if (process.env.RUN_LOCALLY === 'TRUE') {
     res.status(200).json(formatResults(data[String(id)]));
-    return
+    return;
   }
 
   await pool
-    .query('SELECT * FROM items LEFT JOIN production_stats USING (id) LEFT JOIN electricity_stats USING (id) WHERE id = $1;', [id])
+    .query(
+      'SELECT * FROM items LEFT JOIN production_stats USING (id) LEFT JOIN electricity_stats USING (id) WHERE id = $1;',
+      [id],
+    )
     .then((results) => {
       if (results.rows.length == 0) {
         next(errors.ERRORS.ItemNotFound);
       }
-      const unformattedResults = results.rows[0]
+      const unformattedResults = results.rows[0];
       const formattedResults = formatResults(unformattedResults);
       res.status(200).json(formattedResults);
     })
